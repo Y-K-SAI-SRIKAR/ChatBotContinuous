@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+boto3>=1.39.0
+tavily-python
+pydantic>=2.0
+python-dotenv
