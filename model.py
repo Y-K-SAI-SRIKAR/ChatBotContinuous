@@ -427,6 +427,7 @@ def search_products(prompt):
 # RESPONSE LINK VALIDATION
 # ---------------------------------------------------------
 
+
 def sanitize_answer_links(answer, allowed_urls):
 
     allowed = {
@@ -435,10 +436,8 @@ def sanitize_answer_links(answer, allowed_urls):
         if url
     }
 
-    # Keep Markdown links only when their exact destination
-    # is one of the accepted product URLs.
     markdown_link_pattern = re.compile(
-        r"\\[([^\\]]+)\\]\\((https?://[^)]+)\\)"
+        r"\[([^\]]+)\]\((https?://[^)]+)\)"
     )
 
     def replace_markdown_link(match):
@@ -449,7 +448,11 @@ def sanitize_answer_links(answer, allowed_urls):
         if url.rstrip("/").lower() in allowed:
             return f"[{label}]({url})"
 
-        logger.warning("Removed unapproved generated link: %s", url)
+        logger.warning(
+            "Removed unapproved generated link: %s",
+            url
+        )
+
         return label
 
     answer = markdown_link_pattern.sub(
@@ -457,19 +460,30 @@ def sanitize_answer_links(answer, allowed_urls):
         answer
     )
 
-    # Remove any remaining bare URLs that are not approved.
-    bare_url_pattern = re.compile(r"https?://[^\\s)]+", re.IGNORECASE)
+    bare_url_pattern = re.compile(
+        r"https?://[^\s)]+",
+        re.IGNORECASE
+    )
 
     def replace_bare_url(match):
 
         url = match.group(0).rstrip(".,;!?")
+
         if url.rstrip("/").lower() in allowed:
             return url
 
-        logger.warning("Removed unapproved bare URL: %s", url)
+        logger.warning(
+            "Removed unapproved bare URL: %s",
+            url
+        )
+
         return ""
 
-    return bare_url_pattern.sub(replace_bare_url, answer)
+    return bare_url_pattern.sub(
+        replace_bare_url,
+        answer
+    )
+
 
 
 # ---------------------------------------------------------
